@@ -47,4 +47,26 @@ public class Developer {
                 ", specialty='" + specialty + '\'' +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Developer developer = (Developer) o;
+
+        if (id != developer.id) return false;
+        if (firstName != null ? !firstName.equals(developer.firstName) : developer.firstName != null) return false;
+        if (lastName != null ? !lastName.equals(developer.lastName) : developer.lastName != null) return false;
+        return specialty != null ? specialty.equals(developer.specialty) : developer.specialty == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (id ^ (id >>> 32));
+        result = 31 * result + (firstName != null ? firstName.hashCode() : 0);
+        result = 31 * result + (lastName != null ? lastName.hashCode() : 0);
+        result = 31 * result + (specialty != null ? specialty.hashCode() : 0);
+        return result;
+    }
 }
