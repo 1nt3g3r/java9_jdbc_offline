@@ -6,8 +6,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Random;
 
 public class JdbcDeveloperDao implements DAOBase<Developer, Long> {
+    public static final int LIMIT = 1000;
     private Properties properties;
 
     private String dbUrl;
@@ -63,6 +65,36 @@ public class JdbcDeveloperDao implements DAOBase<Developer, Long> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public void addDevelopers(List<Developer> developers) {
+        for(Developer d: developers) {
+            add(d);
+        }
+//
+//        try {
+//            connection.setAutoCommit(false);
+//            int limit = LIMIT;
+//            for (Developer d : developers) {
+//
+//                addPreparedStatement.setString(1, d.getFirstName());
+//                addPreparedStatement.setString(2, d.getLastName());
+//                addPreparedStatement.setString(3, d.getSpecialty());
+//                addPreparedStatement.addBatch();
+//                if (limit <= 0) {
+//                    addPreparedStatement.executeBatch();
+//                    connection.commit();
+//                    limit = LIMIT;
+//                } else {
+//                    limit--;
+//                }
+//            }
+//            addPreparedStatement.executeBatch();
+//            connection.commit();
+//            connection.setAutoCommit(true);
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
     }
 
     public void add(Developer developer) {
@@ -129,7 +161,7 @@ public class JdbcDeveloperDao implements DAOBase<Developer, Long> {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             try {
                 resultSet.close();
             } catch (SQLException e) {
@@ -161,29 +193,41 @@ public class JdbcDeveloperDao implements DAOBase<Developer, Long> {
         }
     }
 
-    public static void main(String[] args) {
-        /*Developer dev1 = new Developer();
-        dev1.setFirstName("Egor");
-        dev1.setLastName("Jackson");
-        dev1.setSpecialty("seo");
-        System.out.println(dev1);
-        new JdbcDeveloperDao().add(dev1);
-        System.out.println(dev1);*/
-//        Developer dev1 = new Developer();
-//        dev1.setId(1);
-//        //  new JdbcDeveloperDao().delete(dev1);
-//        Developer developer1 = new JdbcDeveloperDao().getById(20L);
-//        System.out.println(developer1);
-        JdbcDeveloperDao jdbcDao = new JdbcDeveloperDao();
-        Developer dev1 = jdbcDao.getById(3L);
-        System.out.println(dev1);
-        dev1.setFirstName("Ivan");
-        dev1.setLastName("Ivanov");
-        dev1.setSpecialty("CopyPaster");
-        jdbcDao.update(dev1);
-        List<Developer> developerList = jdbcDao.getAll();
-        for(Developer dev: developerList){
-            System.out.println(dev.toString());
+    public static List<Developer> developerGenerator(int count) {
+        ArrayList<Developer> developerList = new ArrayList<Developer>();
+        for (int i = 0; i < count; i++) {
+            developerList.add(randomDeveloper());
         }
+        return developerList;
+    }
+
+    public static Developer randomDeveloper() {
+        Random r = new Random();
+        Developer developer = new Developer();
+        developer.setFirstName(Float.toString(r.nextFloat()));
+        developer.setLastName(Float.toString(r.nextFloat()));
+        developer.setSpecialty(Float.toString(r.nextFloat()));
+        return developer;
+    }
+
+    public void clear() {
+        try {
+            statement.executeUpdate("truncate developer");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+
+        JdbcDeveloperDao jdbcDao = new JdbcDeveloperDao();
+
+        List<Developer> developers = developerGenerator(500);
+        long timer = System.currentTimeMillis();
+        for (Developer d : developers){
+            jdbcDao.add(d);
+        }
+        timer = System.currentTimeMillis() - timer;
+        System.out.println("Mills: " + timer);
     }
 }
